@@ -32,7 +32,10 @@ ui <- fluidPage(
     sidebarLayout(
         sidebarPanel(
             sliderInput("day",  "Current day:", 
-                min = min(days), max = max(days),  value = max(days), step=1)
+                min = min(days), max = max(days),  value = max(days), step=1),
+            selectInput("metric", label = h3("Select"), 
+                        choices = c("Temperature", "Pressure", "Humidity"),
+                        selected = "Temperature")
         ),
 
         # Show a plot of the generated distribution
@@ -46,19 +49,12 @@ ui <- fluidPage(
 server <- function(input, output) {
     output$historyPlot <- renderPlot({
         day = input$day
-        all_df %>% group_by(day) %>% summarise(temp = mean(temperature)) %>% 
-            ggplot(aes(x=day, y=temp)) + geom_point() + geom_line() +
+        metric = input$metric
+        all_df %>% select(day, y=tolower(metric)) %>% group_by(day) %>% 
+            ggplot(aes(x=day, y=y)) + geom_point() + geom_line() +
             geom_vline(xintercept = day, linetype = "dashed") +
-            labs(x = "Day", y = "Temperature", title = "Mean temperature")
+            labs(x = "Day", y = metric, title = paste("Mean", tolower(metric)))
     })
-    # output$distPlot <- renderPlot({
-    #     # generate bins based on input$bins from ui.R
-    #     x    <- faithful[, 2]
-    #     bins <- seq(min(x), max(x), length.out = input$bins + 1)
-    # 
-    #     # draw the histogram with the specified number of bins
-    #     hist(x, breaks = bins, col = 'darkgray', border = 'white')
-    # })
 }
 
 # Run the application 
