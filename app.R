@@ -12,14 +12,12 @@ library(tidyr)
 library(dplyr)
 library(tidyverse)
 library(ggplot2)
+library(plotly)
 
 
 # Loading data
 all_df = read.csv("all_df.csv")
-days = unique(all_df$day)
-last_day <- max(days)
-last_df <- group_by(all_df, day) %>% summarise(temperature = mean(temperature), pressure = mean(pressure), humidity = mean(humidity)) %>% 
-    filter(day == last_day)
+days = unique(all_df$dayN)
 
 
 # Define UI for application that draws a histogram
@@ -31,7 +29,7 @@ ui <- fluidPage(
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
-            sliderInput("day",  "Current day:", 
+            sliderInput("current_day",  "Current day:", 
                 min = min(days), max = max(days),  value = max(days), step=1),
             selectInput("metric", label = h3("Select"), 
                         choices = c("Temperature", "Pressure", "Humidity"),
@@ -47,12 +45,13 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+    
     output$historyPlot <- renderPlot({
-        day = input$day
+        current_day = input$current_day
         metric = input$metric
-        all_df %>% select(day, y=tolower(metric)) %>% group_by(day) %>% 
-            ggplot(aes(x=day, y=y)) + geom_point() + geom_line() +
-            geom_vline(xintercept = day, linetype = "dashed") +
+        all_df %>% select(dayN, y=tolower(metric)) %>% group_by(dayN) %>% summarize(my = mean(y)) %>% 
+            ggplot(aes(x=dayN, y=my)) + geom_point() + geom_line() +
+            geom_vline(xintercept = current_day, linetype = "dashed") +
             labs(x = "Day", y = metric, title = paste("Mean", tolower(metric)))
     })
 }

@@ -41,7 +41,7 @@ set.seed(1)
 temperature = 20*runif(1, 1,2) + 5*arima.sim(model = list(ma=1), nDays)
 pressure = runif(1, 20, 40) + 5*arima.sim(model = list(ma=1), nDays)
 humidity = runif(1, 20, 40) + 5*arima.sim(model = list(ma=c(2,-1)), nDays)
-all_df = data.frame(room = rooms_df$ids[1], day = 1:nDays, temperature = temperature, pressure = pressure, humidity = humidity)
+all_df = data.frame(room = rooms_df$ids[1], dayN = 1:nDays, temperature = temperature, pressure = pressure, humidity = humidity)
 all_df
 write.csv(all_df, "./all_df.csv")
 ```
@@ -57,7 +57,7 @@ genRoom <- function(room=1, start = 1, end = 20,
                     minHumidity = 0, maxHumidity = 50, dHumidity = 10) {
   nDays = end - start + 1
   data.frame(room = room, 
-             day = start:end,
+             dayN = start:end,
              temperature = runif(1, minTemp, maxTemp) + dTemp*rnorm(nDays),
              pressure = runif(1, minPressure, maxPressure) + dPressure*rnorm(nDays),
              humidity = runif(1, minHumidity, maxHumidity) + dHumidity*rnorm(nDays)
