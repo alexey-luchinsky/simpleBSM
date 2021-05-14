@@ -38,6 +38,11 @@ ui <- fluidPage(
 
         # Show a plot of the generated distribution
         mainPanel(
+           fluidRow(
+               column(4, verbatimTextOutput("tempGauge")),
+               column(4, verbatimTextOutput("presGauge")),
+               column(4, verbatimTextOutput("humGauge"))
+           ),
            plotOutput("historyPlot")
         )
     )
@@ -45,7 +50,21 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-    
+    output$tempGauge <- renderText({
+        current_day = input$current_day
+        all_df %>% select(dayN, temperature) %>% filter(dayN == current_day) %>% 
+            summarise(y = mean(temperature)) %>% .$y %>% round %>% paste("Temperature:",.)
+    })
+    output$presGauge <- renderText({
+        current_day = input$current_day
+        all_df %>% select(dayN, pressure) %>% filter(dayN == current_day) %>% 
+            summarise(y = mean(pressure)) %>% .$y %>% round %>% paste("Pressure:",.)
+    })
+    output$humGauge <- renderText({
+        current_day = input$current_day
+        all_df %>% select(dayN, humidity) %>% filter(dayN == current_day) %>% 
+            summarise(y = mean(humidity)) %>% .$y %>% round %>% paste("Humidity:",.)
+    })
     output$historyPlot <- renderPlot({
         current_day = input$current_day
         metric = input$metric
