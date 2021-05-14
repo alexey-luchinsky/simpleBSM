@@ -1,0 +1,185 @@
+---
+title: "Create Data"
+author: "Alexey Luchinsky"
+date: "5/13/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+rm(list = ls())
+```
+
+
+```{r}
+library(TSA)
+library(tseries)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+library(tidyverse)
+```
+
+
+
+```{r}
+n_rooms <- 10
+rooms_df <- data.frame(ids = 1:n_rooms)
+```
+
+
+
+
+
+```{r}
+nDays = 20
+set.seed(1)
+temperature = 20*runif(1, 1,2) + 5*arima.sim(model = list(ma=1), nDays)
+pressure = runif(1, 20, 40) + 5*arima.sim(model = list(ma=1), nDays)
+humidity = runif(1, 20, 40) + 5*arima.sim(model = list(ma=c(2,-1)), nDays)
+all_df = data.frame(room = rooms_df$ids[1], day = 1:nDays, temperature = temperature, pressure = pressure, humidity = humidity)
+all_df
+write.csv(all_df, "./all_df.csv")
+```
+
+```{r}
+all_df %>% ggplot(aes(x=days, y=temperature)) + geom_line()
+```
+
+```{r}
+genRoom <- function(room=1, start = 1, end = 20,  
+                    minTemp = 50, maxTemp = 70, dTemp = 20,
+                    minPressure = 20, maxPressure = 40, dPressure = 20,
+                    minHumidity = 0, maxHumidity = 50, dHumidity = 10) {
+  nDays = end - start + 1
+  data.frame(room = room, 
+             day = start:end,
+             temperature = runif(1, minTemp, maxTemp) + dTemp*rnorm(nDays),
+             pressure = runif(1, minPressure, maxPressure) + dPressure*rnorm(nDays),
+             humidity = runif(1, minHumidity, maxHumidity) + dHumidity*rnorm(nDays)
+             )
+}
+all_df = data.frame()
+for(r in 1:nrow(rooms_df)) {
+  all_df = rbind(all_df, genRoom(room = rooms_df$ids[r]))
+}
+#all_df$room = relevel(factor(all_df$room ),1)
+```
+
+```{r}
+all_df %>% filter(room < 3)
+```
+
+
+```{r}
+all_df %>%  filter(room ==1 | room == 3) %>% 
+  ggplot(aes(x=day, y=temperature, color = as.factor(room))) + geom_point() + geom_line()
+```
+
+```{r}
+all_df %>%  filter(room ==1 | room == 3) %>% 
+  ggplot(aes(x=day, y=humidity, color = as.factor(room))) + geom_point() + geom_line()
+
+```
+
+```{r}
+df = filter(all_df, room == 1 | room == 2| room == 3)
+plot_ly(df, x=~day, y = ~temperature, type = "scatter", mode = "lines", color = ~factor(room))
+```
+
+```{r}
+all_df %>% group_by(day) %>% summarise(temp = mean(temperature)) %>% 
+  plot_ly(x=~day, y=~temp, type="scatter", mode = "lines")
+```
+
+```{r}
+gen_gauge <- function(value, text = "Temperature", color = "gray", vMin = 20, vMax = 100) {
+  fig <- plot_ly(
+    type = "indicator",    mode = "gauge+number",
+    domain = list(x = c(0, 1), y = c(0, 1)),
+    value = value,
+    title = list(text = text),
+    gauge = list( axis = list(range = list(vMin, vMax)),   bar = list(color = color))
+    ) 
+  fig
+}
+```
+
+
+
+```{r}
+val = all_df %>% group_by(day) %>% summarise(y = mean(humidity)) %>% arrange(desc(day)) %>% .[1,] %>% .$y
+print(val)
+```
+
+```{r}
+val <- all_df  %>%  filter(day == 13) %>% summarise(y=mean(temperature)) %>% .$y
+gen_gauge(val, color = "red", text = "Temperature")
+```
+
+
+```{r}
+fig <- plot_ly(
+    domain = list(x = c(0, 1), y = c(0, 1)),
+    value = 70,
+    title = list(text = "Temperature"),
+    type = "indicator",
+    mode = "gauge+number",
+    gauge = list(
+      axis = list(range = list(20, 100)),
+      bar = list(color = "aaa")
+    )) 
+fig <- fig %>%
+  layout(margin = list(l=20,r=30))
+
+fig
+```
+
+
+```{r}
+fig <- plot_ly(
+  domain = list(x = c(0, 1), y = c(0, 1)),
+  value = 200,
+  title = list(text = "Speed"),
+  type = "indicator",
+  mode = "gauge+number",
+  delta = list(reference = 380),
+  gauge = list(
+    axis =list(range = list(NULL, 500)),
+    steps = list(
+      list(range = c(0, 250), color = "lightgray"),
+      list(range = c(250, 400), color = "gray")),
+    threshold = list(
+      line = list(color = "red", width = 4),
+      thickness = 0.75,
+      value = 490))) 
+fig <- fig %>%
+  layout(margin = list(l=20,r=30))
+
+fig
+```
+
+```{r}
+fig <- plot_ly(
+  domain = list(x = c(0, 1), y = c(0, 1)),
+  value = 450,
+  title = list(text = "Speed"),
+  type = "indicator",
+  mode = "gauge+number+delta",
+  delta = list(reference = 300),
+  gauge = list(
+    axis =list(range = list(NULL, 500)),
+    steps = list(
+      list(range = c(0, 250), color = "lightgray"),
+      list(range = c(250, 400), color = "gray"))
+    )) 
+fig <- fig %>%
+   layout(margin = list(l=20,r=30))
+
+fig
+```
+
