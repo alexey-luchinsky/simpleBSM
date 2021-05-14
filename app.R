@@ -55,9 +55,11 @@ details_panel <- function() {
         titlePanel("Simple Building Management System"),
         sliderInput("current_day2",  "Current day:", min = min(days), max = max(days),  value = max(days), step=1),
         h2("Temperature"),
-        dataTableOutput('table'),
+        dataTableOutput('tempTable'),
         h2("Pressure"),
-        h2("Humidity")
+        dataTableOutput('presTable'),
+        h2("Humidity"),
+        dataTableOutput('humTable'),
         
     )
 }
@@ -73,6 +75,14 @@ gen_gauge <- function(input, output, metric) {
         current_day = input$current_day
         all_df %>% select(dayN, y = tolower(metric)) %>% filter(dayN == current_day) %>% 
             summarise(my = mean(y)) %>% .$my %>% round %>% paste(metric,.)
+    })
+}
+
+gen_table <- function(input, output, metric) {
+    renderDataTable({
+        current_day = input$current_day2
+        df <- all_df %>% filter(dayN == current_day) %>% select(room, tolower(metric)) %>% round
+        df
     })
 }
 
@@ -92,12 +102,10 @@ server <- function(input, output) {
     })
     
 
-    output$table <- renderDataTable({
-        current_day = input$current_day2
-        df <- all_df %>% filter(dayN == current_day) %>% select(room, temperature) %>% round
-        df
-        })
-
+    output$tempTable <- gen_table(input, output, "Temperature")
+    output$presTable <- gen_table(input, output, "Pressure")
+    output$humTable <- gen_table(input, output, "Humidity")
+    
 }
 
 # Run the application 
