@@ -15,6 +15,7 @@ library(tidyverse)
 library(ggplot2)
 library(plotly)
 library(DT)
+library(flexdashboard)
 
 
 # Loading data
@@ -34,9 +35,9 @@ summary_panel <- function() {
             mainPanel(
                 # Show gauges of metrics for current day
                 fluidRow(
-                    column(4, verbatimTextOutput("tempGauge")),
-                    column(4, verbatimTextOutput("presGauge")),
-                    column(4, verbatimTextOutput("humGauge"))
+                    column(4, gaugeOutput("tempGauge")),
+                    column(4, gaugeOutput("presGauge")),
+                    column(4, gaugeOutput("humGauge"))
                 ),
                 # Show history plot for selected metric
                 plotOutput("historyPlot")
@@ -82,13 +83,16 @@ ui <- fluidPage(
 )
 
 
-gen_gauge <- function(input, output, metric) {
-    renderText({
+
+gen_gauge <- function(input, output, metric, min = 0, max = 100) {
+    renderGauge({
         current_day = input$current_day
-        all_df %>% select(dayN, y = tolower(metric)) %>% filter(dayN == current_day) %>% 
-            summarise(my = mean(y)) %>% .$my %>% round %>% paste(metric,.)
+        x <- all_df %>% select(dayN, y = tolower(metric)) %>% filter(dayN == current_day) %>% 
+            summarise(my = mean(y)) %>% .$my %>% round
+        gauge(x, min = min, max = max, label = metric)
     })
 }
+
 
 gen_table <- function(input, output, metric) {
     renderDataTable({
