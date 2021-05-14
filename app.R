@@ -8,6 +8,7 @@
 #
 
 library(shiny)
+library(shinyWidgets)
 library(tidyr)
 library(dplyr)
 library(tidyverse)
@@ -22,27 +23,21 @@ days = unique(all_df$dayN)
 ######### Summary Panel #############
 summary_panel <- function() {
     fluidPage(
-        
-        # Application title
-        titlePanel("Simple Building Management System"),
-        
-        # Sidebar with a slider input for number of bins 
+        # Sidebar with a selector for metric
         sidebarLayout(
             sidebarPanel(
-                sliderInput("current_day",  "Current day:", 
-                            min = min(days), max = max(days),  value = max(days), step=1),
-                selectInput("metric", label = h3("Select"), 
+                    selectInput("metric", label = h3("Select"), 
                             choices = c("Temperature", "Pressure", "Humidity"),
                             selected = "Temperature")
             ),
-            
-            # Show a plot of the generated distribution
             mainPanel(
+                # Show gauges of metrics for current day
                 fluidRow(
                     column(4, verbatimTextOutput("tempGauge")),
                     column(4, verbatimTextOutput("presGauge")),
                     column(4, verbatimTextOutput("humGauge"))
                 ),
+                # Show history plot for selected metric
                 plotOutput("historyPlot")
             )
         )
@@ -52,8 +47,6 @@ summary_panel <- function() {
 #### Details Panel
 details_panel <- function() {
     fluidPage(
-        titlePanel("Simple Building Management System"),
-        sliderInput("current_day2",  "Current day:", min = min(days), max = max(days),  value = max(days), step=1),
         h2("Temperature"),
         dataTableOutput('tempTable'),
         h2("Pressure"),
@@ -65,10 +58,28 @@ details_panel <- function() {
 }
 
 # Define UI for application that draws a histogram
-ui <- tabsetPanel(position = "below",
-                  tabPanel("Summary", summary_panel()),
-                  tabPanel("Details", details_panel())
-                  )
+ui <- fluidPage(
+    # Application title
+    titlePanel("Simple Building Management System"),
+    
+    # Sidebar with a slider input for current day 
+    sidebarLayout(
+        sidebarPanel(
+            noUiSliderInput("current_day",  "Current day:", 
+                        min = min(days), max = max(days),  value = max(days), step=1,
+                        orientation = "vertical", direction = "rtl", width = "50px", height = "300px"),
+            width = 2
+        ),
+        mainPanel(
+            tabsetPanel(position = "below",
+                tabPanel("Summary", summary_panel()),
+                tabPanel("Details", details_panel())
+            ),
+            width = 10
+        )
+    )
+)
+
 
 gen_gauge <- function(input, output, metric) {
     renderText({
@@ -80,7 +91,7 @@ gen_gauge <- function(input, output, metric) {
 
 gen_table <- function(input, output, metric) {
     renderDataTable({
-        current_day = input$current_day2
+        current_day = input$current_day
         df <- all_df %>% filter(dayN == current_day) %>% select(room, tolower(metric)) %>% round
         df
     })
