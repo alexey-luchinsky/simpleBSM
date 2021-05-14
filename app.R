@@ -25,6 +25,12 @@ days = unique(all_df$dayN)
 ######### Summary Panel #############
 summary_panel <- function() {
     fluidPage(
+        # Show gauges of metrics for current day
+        fluidRow(
+            column(4, gaugeOutput("tempGauge")),
+            column(4, gaugeOutput("presGauge")),
+            column(4, gaugeOutput("humGauge"))
+        ),
         # Sidebar with a selector for metric
         sidebarLayout(
             sidebarPanel(
@@ -33,12 +39,6 @@ summary_panel <- function() {
                             selected = "Temperature")
             ),
             mainPanel(
-                # Show gauges of metrics for current day
-                fluidRow(
-                    column(4, gaugeOutput("tempGauge")),
-                    column(4, gaugeOutput("presGauge")),
-                    column(4, gaugeOutput("humGauge"))
-                ),
                 # Show history plot for selected metric
                 plotOutput("historyPlot")
             )
