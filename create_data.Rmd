@@ -67,6 +67,7 @@ all_df = data.frame()
 for(r in 1:nrow(rooms_df)) {
   all_df = rbind(all_df, genRoom(room = rooms_df$ids[r]))
 }
+write.csv(all_df, "./all_df.csv")
 #all_df$room = relevel(factor(all_df$room ),1)
 ```
 
