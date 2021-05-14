@@ -14,6 +14,7 @@ library(dplyr)
 library(tidyverse)
 library(ggplot2)
 library(plotly)
+library(DT)
 
 
 # Loading data
@@ -93,7 +94,9 @@ gen_table <- function(input, output, metric) {
     renderDataTable({
         current_day = input$current_day
         df <- all_df %>% filter(dayN == current_day) %>% select(room, tolower(metric)) %>% round
-        df
+        datatable(df, rownames = F, selection = "none", options = list(dom="t"))
+        # datatable(df, filter="top", selection="multiple", escape=FALSE,
+        #           options = list(dom = 't'))
     })
 }
 
