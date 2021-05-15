@@ -18,13 +18,18 @@ library(DT)
 library(flexdashboard)
 
 
-# Loading data
-all_df = read.csv("all_df.csv")
-days = unique(all_df$dayN)
+reload_data <- function(file_name = "all_df.csv") {
+    print(paste("Reloading file", file_name))
+    all_df <<- read.csv(file_name)
+    days <<- unique(all_df$dayN)
+}
+
+reload_data()
 
 ######### Summary Panel #############
 summary_panel <- function() {
     fluidPage(
+        h2("Averaged information"),
         # Show gauges of metrics for current day
         fluidRow(
             column(4, gaugeOutput("tempGauge")),
@@ -49,11 +54,12 @@ summary_panel <- function() {
 #### Details Panel
 details_panel <- function() {
     fluidPage(
-        h2("Temperature"),
+        h2("Detailed info"),
+        h3("Temperature"),
         dataTableOutput('tempTable'),
-        h2("Pressure"),
+        h3("Pressure"),
         dataTableOutput('presTable'),
-        h2("Humidity"),
+        h3("Humidity"),
         dataTableOutput('humTable'),
         
     )
@@ -61,9 +67,10 @@ details_panel <- function() {
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
+    tags$head(tags$script(src = "message-handler.js")),
     # Application title
     titlePanel("Simple Building Management System"),
-    
+    actionButton("reload", "Reload"),
     # Sidebar with a slider input for current day 
     sidebarLayout(
         sidebarPanel(
@@ -89,7 +96,7 @@ gen_gauge <- function(input, output, metric, min = 0, max = 100) {
         current_day = input$current_day
         x <- all_df %>% select(dayN, y = tolower(metric)) %>% filter(dayN == current_day) %>% 
             summarise(my = mean(y)) %>% .$my %>% round
-        gauge(x, min = min, max = max, label = metric)
+        gauge(x, min = min, max = max, label = metric, href = "http://www.bgsu.edu")
     })
 }
 
@@ -124,6 +131,10 @@ server <- function(input, output) {
     output$presTable <- gen_table(input, output, "Pressure")
     output$humTable <- gen_table(input, output, "Humidity")
     
+    new_data <- eventReactive(input$reload, {
+        print("RELOAD")
+        reload_data()
+    })
 }
 
 # Run the application 
