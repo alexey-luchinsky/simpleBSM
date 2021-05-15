@@ -1,0 +1,10 @@
+install.packages("shiny",repos = "http://cran.us.r-project.org")
+install.packages("shinyWidgets",repos = "http://cran.us.r-project.org")
+install.packages("tidyr",repos = "http://cran.us.r-project.org")
+install.packages("dplyr",repos = "http://cran.us.r-project.org")
+install.packages("tidyverse",repos = "http://cran.us.r-project.org")
+install.packages("ggplot2",repos = "http://cran.us.r-project.org")
+install.packages("plotly",repos = "http://cran.us.r-project.org")
+install.packages("DT",repos = "http://cran.us.r-project.org")
+install.packages("flexdashboard",repos = "http://cran.us.r-project.org")
+
