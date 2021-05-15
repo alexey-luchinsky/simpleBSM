@@ -7,13 +7,18 @@
 #    http://shiny.rstudio.com/
 #
 
+# need to install: libssl-dev
+
+# info about shiny on aws: https://towardsdatascience.com/how-to-host-a-r-shiny-app-on-aws-cloud-in-7-simple-steps-5595e7885722
+
+
 library(shiny)
 library(shinyWidgets)
 library(tidyr)
 library(dplyr)
-library(tidyverse)
-library(ggplot2)
-library(plotly)
+#library(tidyverse)
+#library(ggplot2)
+library(plotly)       # libssl-dev is required, libcurl4-openssl-dev 
 library(DT)
 library(flexdashboard)
 
