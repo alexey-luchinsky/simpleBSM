@@ -156,9 +156,27 @@ server <- function(input, output) {
             , rownames = F, selection = "none")
     )
     
-    new_data <- eventReactive(input$reload, {
+    new_data <- observeEvent(input$reload, {
         print("RELOAD")
         reload_data()
+    })
+    
+    observeEvent(input$about, {
+        print("ABOUT")
+        showModal(modalDialog(
+            p("In this application I am using tha R shiny toolkit to build a simple Building Management System dashboard"),
+            p("In our toy bulding there are 10 rooms with temperature, pressure and humidity detectors in each room. Data from all these rooms
+              was collected 20 days"),
+            tags$ul(
+                tags$li("In tab \"1: Summary\" you can find some averaged by rooms inforamtion for the selected day"),
+                tags$li("In tab \"2: Details\" detaied information for each room is presented"),
+                tags$li("In tah \"3: Original Data\" the original table is shown")
+            ),
+            p("Click anywhere outside this dialog box to exit it"),
+            title = "Simple Building Management System",
+            easyClose = TRUE,
+            footer = NULL
+        ))
     })
 }
 
