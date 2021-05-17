@@ -10,6 +10,7 @@
 # need to install: libssl-dev
 
 # info about shiny on aws: https://towardsdatascience.com/how-to-host-a-r-shiny-app-on-aws-cloud-in-7-simple-steps-5595e7885722
+#   https://www.linode.com/docs/guides/how-to-deploy-rshiny-server-on-ubuntu-and-debian/
 
 
 library(shiny)
@@ -70,6 +71,14 @@ details_panel <- function() {
     )
 }
 
+## Original Data Panel
+original_data_panel <- function() {
+    fluidPage(
+        h2("Original Data"),
+        dataTableOutput('originalTable')
+    )
+}
+
 # Define UI for application that draws a histogram
 ui <- fluidPage(
     tags$head(tags$script(src = "message-handler.js")),
@@ -86,8 +95,9 @@ ui <- fluidPage(
         ),
         mainPanel(
             tabsetPanel(position = "below",
-                tabPanel("Summary", summary_panel()),
-                tabPanel("Details", details_panel())
+                tabPanel("1: Summary", summary_panel()),
+                tabPanel("2: Details", details_panel()),
+                tabPanel("3: Original Data", original_data_panel())
             ),
             width = 10
         )
@@ -135,6 +145,12 @@ server <- function(input, output) {
     output$tempTable <- gen_table(input, output, "Temperature")
     output$presTable <- gen_table(input, output, "Pressure")
     output$humTable <- gen_table(input, output, "Humidity")
+    
+    output$originalTable <- renderDataTable(
+        datatable(
+            all_df %>% select(dayN, room, temperature, pressure, humidity) %>% round(2)
+            , rownames = F, selection = "none")
+    )
     
     new_data <- eventReactive(input$reload, {
         print("RELOAD")
