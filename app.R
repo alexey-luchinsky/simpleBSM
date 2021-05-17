@@ -84,7 +84,11 @@ ui <- fluidPage(
     tags$head(tags$script(src = "message-handler.js")),
     # Application title
     titlePanel("Simple Building Management System"),
-    actionButton("reload", "Reload"),
+    fluidRow(
+        column(2, actionButton("reload", "Reload"), offset = 1), 
+        column(2, actionButton("about", "About"), offset = 5)
+    ),
+    fluidRow(column(width = 6, offset = 0, style='padding-left:0px; padding-right:1px; padding-top:5px; padding-bottom:5px')),
     # Sidebar with a slider input for current day 
     sidebarLayout(
         sidebarPanel(
